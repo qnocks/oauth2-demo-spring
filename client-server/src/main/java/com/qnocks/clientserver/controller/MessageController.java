@@ -23,8 +23,8 @@ public class MessageController {
     private final WebClient webClient;
 
     @GetMapping("/messages")
-    public String getMessage(@RegisteredOAuth2AuthorizedClient("messages-client-authorization-code")
-                             OAuth2AuthorizedClient authorizedClient) {
+    public String getMessages(@RegisteredOAuth2AuthorizedClient("messages-client-authorization-code")
+                              OAuth2AuthorizedClient authorizedClient) {
         return webClient.get()
                 .uri("http://resource-server:8082/messages")
                 .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(authorizedClient))

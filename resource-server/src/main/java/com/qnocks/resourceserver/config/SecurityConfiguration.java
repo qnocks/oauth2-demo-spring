@@ -23,7 +23,6 @@ public class SecurityConfiguration {
                 .and()
                 .oauth2ResourceServer()
                 .jwt();
-
         return http.build();
     }
 }

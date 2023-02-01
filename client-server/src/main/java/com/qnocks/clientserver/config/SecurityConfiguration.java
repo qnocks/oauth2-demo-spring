@@ -24,7 +24,6 @@ public class SecurityConfiguration {
                         OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI +
                                 "/messages-client-oidc"))
                 .oauth2Client(Customizer.withDefaults());
-
         return http.build();
     }
 }

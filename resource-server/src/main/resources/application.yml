@@ -2,11 +2,11 @@ server:
   port: 8082
 
 spring:
-  application:
-    name: resource-server
+  application.name: resource-server
+  # the current backend is configured to be used as a resource server
+  # then, I must indicate the URI of the backend-auth to be used and which token to be used
   security:
     oauth2:
       resource-server:
         jwt:
-#          This make resource-server the ability to validate the code which comes from authorization-server
           issuer-uri: http://authorization-server:8081

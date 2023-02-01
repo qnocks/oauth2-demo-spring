@@ -34,45 +34,67 @@ public class SecurityConfiguration {
      * Then apply authentication which will be used to communicate between client-server and authentication-server
      */
 
-    @SneakyThrows
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        http.exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(
-                new LoginUrlAuthenticationEntryPoint("/login")));
+        http
+                // Redirect to the login page when not authenticated from the
+                // authorization endpoint
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(
+                                new LoginUrlAuthenticationEntryPoint("/login"))
+                )
+        ;
 
         return http.build();
     }
 
-    @SneakyThrows
+    /**
+     * Then, will be applied the rest of the security filters.
+     * Here, I indicate that all the endpoints require authentication and which is the login form.
+     */
     @Bean
     @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) {
-        http.authorizeRequests(authorize -> authorize.anyRequest().authenticated())
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+                // Form login handles the redirect to the login page from the
+                // authorization server filter chain
                 .formLogin(Customizer.withDefaults());
-
         return http.build();
     }
 
+    /**
+     * Configuration of the OAuth2 client.
+     * Multiple clients can be configured. The current implementation stores them in memory, but a table
+     * in the database can be used to store all the registered clients.
+     */
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        var client = RegisteredClient.withId(UUID.randomUUID().toString())
+        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
+                // client-id and client-secret that must be used from all the OAuth2 clients
                 .clientId("messages-client")
                 .clientSecret("$2a$12$/xdT4GByOtITcHq7SGtV.ORBMc.Vh3gu3nWz1IDuKxCiBBmG9aiLG")
+                // the Basic authentication method will be used between backend-client and backend-auth
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                // grant types to be used
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                // permitted redirect URI after the authentication is successful
                 .redirectUri("http://client-server:8083/login/oauth2/code/messages-client-oidc")
                 .redirectUri("http://client-server:8083/authorized")
+                // acceptable scopes for the authorization
                 .scope(OidcScopes.OPENID)
                 .scope("message.read")
                 .scope("message.write")
                 .build();
 
-        return new InMemoryRegisteredClientRepository(client);
+        return new InMemoryRegisteredClientRepository(registeredClient);
     }
 
+    /**
+     * Acceptable URL of the authorization server
+     */
     @Bean
     public ProviderSettings providerSettings() {
         return ProviderSettings.builder()

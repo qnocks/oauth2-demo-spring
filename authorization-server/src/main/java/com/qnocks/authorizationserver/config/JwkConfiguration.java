@@ -22,6 +22,7 @@ public class JwkConfiguration {
      * The JWT will be used to communicate between backend-auth and backend-resources once backend-client completed
      * the authentication.
      */
+
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
         KeyPair keyPair = generateRsaKey();
