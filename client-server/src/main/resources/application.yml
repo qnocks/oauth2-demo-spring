@@ -1,0 +1,34 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: client-server
+  security:
+    oauth2:
+      client:
+        registration:
+#          Configure OpenID Connect
+          messages-client-oidc:
+            provider: spring
+            client-id: messages-client
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://client-server:8083/login/oauth2/code/{registrationId]"
+#            Within OpenID Connect indicate scope "openid"
+            scope: openid
+            client-name: messages-client-oidc
+#          Configure OAuth2 authorization code workflow
+          messages-client-authorization-code:
+            provider: spring
+            client-id: messages-client
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://client-server:8083/authorized"
+#            Within OAuth2 authorization code indicate scope "message.read" which is the one asked in resource-server
+            scope: message.read
+            client-name: messages-client-authorization-code
+#            Indicate where to locate the authorization server
+        provider:
+          spring:
+            issuer-uri: http://authorization-server:8081
