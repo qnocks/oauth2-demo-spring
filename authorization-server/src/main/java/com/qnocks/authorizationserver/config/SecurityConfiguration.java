@@ -1,6 +1,5 @@
 package com.qnocks.authorizationserver.config;
 
-import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
@@ -71,7 +70,7 @@ public class SecurityConfiguration {
      */
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        var registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 // client-id and client-secret that must be used from all the OAuth2 clients
                 .clientId("messages-client")
                 .clientSecret("$2a$12$/xdT4GByOtITcHq7SGtV.ORBMc.Vh3gu3nWz1IDuKxCiBBmG9aiLG")
@@ -89,7 +88,25 @@ public class SecurityConfiguration {
                 .scope("message.write")
                 .build();
 
-        return new InMemoryRegisteredClientRepository(registeredClient);
+        var gatewayClient = RegisteredClient.withId(UUID.randomUUID().toString())
+                // client-id and client-secret that must be used from all the OAuth2 clients
+                .clientId("gateway-client")
+                .clientSecret("$2a$12$ZUamdYa4buAoIoxI6lGOMunBKesogEKoenlUSjCfyX8.y.x53HYUG")
+                // the Basic authentication method will be used between backend-client and backend-auth
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                // grant types to be used
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                // permitted redirect URI after the authentication is successful
+                .redirectUri("http://gateway-client-server:8083/login/oauth2/code/gateway")
+                .redirectUri("http://gateway-client-server:8083/authorized")
+                // acceptable scopes for the authorization
+                .scope(OidcScopes.OPENID)
+                .scope("message.read")
+                .scope("message.write")
+                .build();
+
+        return new InMemoryRegisteredClientRepository(registeredClient, gatewayClient);
     }
 
     /**
