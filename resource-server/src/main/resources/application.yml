@@ -9,4 +9,6 @@ spring:
     oauth2:
       resource-server:
         jwt:
-          issuer-uri: http://authorization-server:8081
+#          issuer-uri: http://authorization-server:8081
+          issuer-uri: http://keycloak-auth-server:8080/auth/realms/oauth_demo
+
